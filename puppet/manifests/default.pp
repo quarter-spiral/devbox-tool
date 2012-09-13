@@ -23,27 +23,27 @@ class install_sqlite3 {
 }
 class { 'install_sqlite3': }
 
-#class install_postgres {
-  #class { 'postgresql': }
+class install_postgres {
+  class { 'postgresql': }
 
-  #class { 'postgresql::server': }
+  class { 'postgresql::server': }
 
-  #pg_user { 'qs':
-    #ensure  => present,
-    #require => Class['postgresql::server']
-  #}
+  pg_user { 'qs':
+    ensure  => present,
+    require => Class['postgresql::server']
+  }
 
-  #pg_user { 'vagrant':
-    #ensure    => present,
-    #superuser => true,
-    #require   => Class['postgresql::server']
-  #}
+  pg_user { 'vagrant':
+    ensure    => present,
+    superuser => true,
+    require   => Class['postgresql::server']
+  }
 
-  #package { 'libpq-dev':
-    #ensure => installed
-  #}
-#}
-#class { 'install_postgres': }
+  package { 'libpq-dev':
+    ensure => installed
+  }
+}
+class { 'install_postgres': }
 
 class install_core_packages {
   package { ['build-essential', 'git-core']:
