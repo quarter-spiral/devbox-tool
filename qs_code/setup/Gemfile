@@ -3,3 +3,4 @@ source :rubygems
 gem 'grit'
 gem 'highline'
 gem 'json'
+gem 'rake'
