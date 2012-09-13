@@ -1,8 +1,8 @@
-# A Virtual Machine for Ruby on Rails Core Development
+# A Virtual Machine for Quarter Spiral Development
 
 ## Introduction
 
-This project automates the setup of a development environment for Ruby on Rails core development. This is the easiest way to build a box with everything ready to start hacking on your pull request, all in an isolated virtual machine.
+This project automates the setup of a development environment for all Quarter Spiral development.
 
 ## Requirements
 
@@ -14,13 +14,21 @@ This project automates the setup of a development environment for Ruby on Rails 
 
 Building the virtual machine is this easy:
 
-    host $ git clone https://github.com/rails/rails-dev-box.git
-    host $ cd rails-dev-box
+    host $ git clone https://github.com/quarter-spiral/devbox-tool.git
+    host $ cd devbox-tool
     host $ vagrant up
+    host $ vagrant reload
+    # Wait a looong time
+    host $ cd /vagrant/qs_code/setup
+    # Approve use of rvm
+    host $ bundle install
+    host $ rake
+    # Wait while all our repos are checked out
+
 
 That's it.
 
-If the base box is not present that command fetches it first. The setup itself takes about 3 minutes in my MacBook Air. After the installation has finished, you can access the virtual machine with
+After the installation has finished, you can access the virtual machine with
 
     host $ vagrant ssh
     Welcome to Ubuntu 12.04 LTS (GNU/Linux 3.2.0-23-generic-pae i686)
@@ -33,19 +41,22 @@ Port 3000 in the host computer is forwarded to port 3000 in the virtual machine.
 
 * Git
 
-* Ruby 1.9.3
+* RVM
+  * MRI 1.9.3
+  * JRuby
+  * Rubinius (RBX) Head
 
-* Bundler
+* SQLite3 and Postgres
 
-* SQLite3, MySQL, and Postgres
-
-* System dependencies for nokogiri, sqlite3, mysql, mysql2, and pg
-
-* Databases and users needed to run the Active Record test suite
-
-* therubyracer
+* System dependencies for nokogiri, sqlite3 and pg
 
 * Memcached
+
+* Neo4J
+
+* MongoDB
+
+* Setup script for all QS repos
 
 ## Recommended Workflow
 
@@ -55,20 +66,10 @@ The recommended workflow is
 
 * test within the virtual machine.
 
-Just clone your Rails fork in the very directory of the Rails development box in the host computer:
-
-    host $ ls
-    README.md   Vagrantfile puppet
-    host $ git clone git@github.com:<your username>/rails.git
-
-Vagrant mounts that very directory as _/vagrant_ within the virtual machine:
-
-    vagrant@rails-dev-box:~$ ls /vagrant
-    puppet  rails  README.md  Vagrantfile
-
-so we are ready to go to edit in the host, and test in the virtual machine.
-
-This workflow is convenient because in the host computer one normally has his editor of choice fine-tuned, Git configured, and SSH keys in place.
+You can find all QS projects at ``/vagrant/qs_code/projects`` within the
+virtual machine. This directory is also within **THIS** project as
+``./qs_code/projects`` so you can just use your normal editor on your
+machine to edit the code right there!
 
 ## Virtual Machine Management
 

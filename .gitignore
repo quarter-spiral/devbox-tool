@@ -1,2 +1,3 @@
 .vagrant
-rails
+qs_code/projects
+qs_code/setup/Gemfile.lock

@@ -1,0 +1,38 @@
+h1. Neo4j module for Puppet
+
+* Developed by "Hendy Irawan":http://www.hendyirawan.com/
+* Originally forked from "alfredc/puppet-neo4j":https://github.com/alfredc/puppet-neo4j
+
+This module installs Neo4j as a standalone server.
+
+h2. Requirements
+
+1. @curl@ package
+2. @lsof@ packae
+3. @openjdk-7-jre-headless@ package or any JRE
+
+h2. Typical Usage
+
+bc. package { curl: ensure => present }
+package { lsof: ensure => present }
+package { openjdk-7-jre-headless: ensure => present }
+class { neo4j: }
+Package['openjdk-7-jre-headless'] -> Class['neo4j']
+
+h2. Use Your Own URL
+
+Useful for Vagrant VMs.
+
+bc. class { neo4j:
+  release => 'neo4j-community-1.6',
+  mirror_url => 'http://33.33.33.1:8081/nexus/service/local/repositories/thirdparty/content/org/neo4j/neo4j-community/1.6/'
+}
+
+h2. Open Files Limit (ulimit)
+
+Although the limit has been raised, neo4j may still complain (it's neo4j's bug):
+
+bc. WARNING: Detected a limit of 1024 for maximum open files, while a minimum value of 40000 is recommended.
+
+This is NORMAL.
+To check yourself, @sudo su neo4j@ then @ulimit -n@, you'll see 40000.

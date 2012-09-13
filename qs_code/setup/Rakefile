@@ -1,0 +1,171 @@
+#encoding: utf-8
+
+def github_http
+  return @github_http if @github_http
+
+  github_api_uri = URI.parse('https://api.github.com/')
+
+  @github_http = Net::HTTP.new(github_api_uri.host, github_api_uri.port)
+  @github_http.use_ssl = true
+  @github_http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+
+  @github_http
+end
+
+def github_request(url, clazz, options = {})
+  if options[:oauth]
+    suffix = (url =~ /\?/) ? '&' : '?'
+    url += "#{suffix}access_token=#{options[:oauth]}"
+  end
+
+  request = clazz.new(url)
+
+  if options[:basic_auth]
+    request.basic_auth(options[:basic_auth][:user], options[:basic_auth][:pass])
+  end
+
+  request.body = JSON.dump(options[:body] || {})
+  response = github_http.request(request)
+  data = JSON.parse(response.body)
+
+  case response.code.to_i
+  when 401, 404
+    raise "Error reaching GitHub: #{data['message']}"
+  when 200, 201
+    return data
+  else
+    raise "Wrong response code: #{response.code} #{response.inspect}"
+  end
+end
+
+def github_post(url, options = {})
+  github_request(url, Net::HTTP::Post, options)
+end
+
+def github_get(url, options = {})
+  github_request(url, Net::HTTP::Get, options)
+end
+
+def github_log(note)
+  print "#{note}"
+
+  result = nil
+  if block_given?
+    print '…'
+    result = yield
+    print " done."
+  end
+  puts
+  result
+rescue Exception => e
+  puts " failed!"
+  raise e
+end
+alias gl github_log
+
+def clone_repository(repository, base_path)
+  name = File.basename(repository['full_name'])
+  target = File.expand_path("./#{name}", base_path)
+  `git clone #{repository['ssh_url']} #{target}`
+  target
+end
+
+def nice_sys(args)
+  IO.popen(args).read
+end
+
+task :add_new_repos do
+  Bundler.require
+  require "highline/import"
+  require "json"
+  require "uri"
+  require "net/https"
+  require "fileutils"
+  require "grit"
+
+  user = ask("Github User: ")
+  pass = ask("Github password:  " ) { |q| q.echo = "x"}
+
+  organization = 'quarter-spiral'
+
+  root = File.dirname(__FILE__)
+  project_path = File.expand_path('../projects', root)
+
+  token = gl("Authenticating with GitHub") do
+    token = github_post('/authorizations', basic_auth: {user: user, pass: pass}, body: {scopes: ['repo']})['token']
+  end
+
+  repos = gl("Retrieving repositories of #{organization}") do
+    github_get("/orgs/#{organization}/repos", oauth: token)
+  end
+
+  gl("Found #{repos.size} repositories.")
+
+  existing_repos = gl("Initializing existing repos") do
+    Hash[Dir[File.expand_path('./*', project_path)].map do |path|
+      next unless File.directory?(path)
+      remotes = `cd #{path};git remote -v`
+      remotes = remotes.split("\n").map {|r| r.split(/\s+/)}.select {|r| r.last == '(fetch)'}.map {|r| r[1]}
+      [path, remotes]
+    end]
+  end
+
+  updates = []
+
+  home = File.expand_path(".", "~")
+  old_authorized_key_file = ''
+  gl("Setting up SSH to bundle later on") do
+    `mkdir -p ~/.ssh/`
+    `touch ~/.ssh/__qs_setup_key`
+    `rm ~/.ssh/__qs_setup_key*`
+    `ssh-keygen -v -t dsa -f ~/.ssh/__qs_setup_key -N ""`
+    old_authorized_key_file = File.read(File.expand_path("./.ssh/authorized_keys", home))
+    `cat ~/.ssh/__qs_setup_key.pub >> ~/.ssh/authorized_keys`
+  end
+
+  gl("Setting up new repositories")
+  repos.each do |repo|
+    name = repo['full_name']
+    project_name = File.basename(name)
+    existing_repo = gl("Check if #{project_name} is already checked out") do
+      (existing_repos.detect {|path, er| er.include?(repo['ssh_url'])} || []).first
+    end
+
+    if existing_repo
+      gl("Found an existing clone. Doing nothing") do
+      end
+    else
+      existing_repo = gl("Repository not cloned yet. Cloning #{name}") do
+        clone_repository(repo, project_path)
+      end
+
+      if File.exist?(File.expand_path("./.rvmrc", existing_repo))
+        gl("Trust .rvmrc") do
+          puts `/bin/bash -l -c 'rvm rvmrc trust #{existing_repo}'`
+        end
+      end
+
+      if File.exist?(File.expand_path("./Gemfile", existing_repo))
+        gl("Bundling") do
+          puts `ssh -i ~/.ssh/__qs_setup_key localhost "/bin/bash -l -c 'cd #{existing_repo}; bundle install'"`
+        end
+      end
+      updates << name
+    end
+  end
+
+  gl("Cleaning up SSH keys") do
+    `rm ~/.ssh/__qs_setup_key*`
+    File.open(File.expand_path("./.ssh/authorized_keys", home), 'w') {|f| f.write old_authorized_key_file}
+  end
+
+  if updates.size > 0
+    puts "Added:"
+    puts updates.map {|e| "  - #{e}"}.join "\n"
+  else
+    puts "No repositories added."
+  end
+
+end
+
+task :default => :add_new_repos

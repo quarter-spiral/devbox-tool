@@ -1,5 +1,3 @@
-$ar_databases = ['activerecord_unittest', 'activerecord_unittest2']
-
 # Make sure apt-get -y update runs before anything else.
 stage { 'preinstall':
   before => Stage['main']
@@ -25,62 +23,27 @@ class install_sqlite3 {
 }
 class { 'install_sqlite3': }
 
-class install_mysql {
-  class { 'mysql': }
+#class install_postgres {
+  #class { 'postgresql': }
 
-  class { 'mysql::server':
-    config_hash => { 'root_password' => '' }
-  }
+  #class { 'postgresql::server': }
 
-  database { $ar_databases:
-    ensure  => present,
-    charset => 'utf8',
-    require => Class['mysql::server'] 
-  }
+  #pg_user { 'qs':
+    #ensure  => present,
+    #require => Class['postgresql::server']
+  #}
 
-  database_user { 'rails@localhost':
-    ensure  => present,
-    require => Class['mysql::server'] 
-  }
+  #pg_user { 'vagrant':
+    #ensure    => present,
+    #superuser => true,
+    #require   => Class['postgresql::server']
+  #}
 
-  database_grant { ['rails@localhost/activerecord_unittest', 'rails@localhost/activerecord_unittest2']:
-    privileges => ['all'],
-    require    => Database_user['rails@localhost']
-  }
-
-  package { 'libmysqlclient15-dev':
-    ensure => installed
-  }
-}
-class { 'install_mysql': }
-
-class install_postgres {
-  class { 'postgresql': }
-
-  class { 'postgresql::server': }
-
-  pg_database { $ar_databases:
-    ensure   => present,
-    encoding => 'UTF8',
-    require  => Class['postgresql::server']
-  }
-
-  pg_user { 'rails':
-    ensure  => present,
-    require => Class['postgresql::server'] 
-  }
-
-  pg_user { 'vagrant':
-    ensure    => present,
-    superuser => true,
-    require   => Class['postgresql::server']
-  }
-
-  package { 'libpq-dev':
-    ensure => installed
-  }
-}
-class { 'install_postgres': }
+  #package { 'libpq-dev':
+    #ensure => installed
+  #}
+#}
+#class { 'install_postgres': }
 
 class install_core_packages {
   package { ['build-essential', 'git-core']:
@@ -89,30 +52,74 @@ class install_core_packages {
 }
 class { 'install_core_packages': }
 
-class install_ruby {
-  package { 'ruby1.9.3':
-    ensure => installed
-  }
-
-  exec { '/usr/bin/gem install bundler --no-rdoc --no-ri':
-    unless  => '/usr/bin/gem list | grep bundler',
-    user    => 'root',
-    require => Package['ruby1.9.3']
-  }
-
-  exec { '/usr/bin/gem install therubyracer --no-rdoc --no-ri':
-    unless  => '/usr/bin/gem list | grep therubyracer',
-    user    => 'root',
-    require => [Package['ruby1.9.3'], Package['build-essential']]
-  }
-}
-class { 'install_ruby': }
-
 class install_nokogiri_dependencies {
-  package { ['libxml2', 'libxml2-dev', 'libxslt1-dev']:
-    ensure => installed
-  }
+  if ! defined(Package['libxml2'])      { package { 'libxml2':      ensure => installed } }
+  if ! defined(Package['libxml2-dev'])  { package { 'libxml2-dev':  ensure => installed } }
+  if ! defined(Package['libxslt1-dev']) { package { 'libxslt1-dev': ensure => installed } }
 }
 class { 'install_nokogiri_dependencies': }
+
+class install_java {
+  if ! defined(Package['openjdk-7-jre-headless']) { package { 'openjdk-7-jre-headless': ensure => installed } }
+}
+class { 'install_java': }
+
+class install_neo4j {
+  package { lsof: ensure => present }
+  class { neo4j: }
+}
+Package['openjdk-7-jre-headless'] -> Class['neo4j']
+class { 'install_neo4j': }
+
+class { mongodb:
+  ulimit_nofile => 40000,
+}
+
+class install_rbx_dependencies {
+  if ! defined(Package['libtool']) { package { 'libtool': ensure => installed } }
+}
+class { 'install_rbx_dependencies': }
+
+include rvm
+rvm::system_user { vagrant: ; }
+
+if $rvm_installed == "true" {
+  # Hax to fix permissions to install rbx
+  exec { "fix rbx' rvm dependencies permissions":
+    command   => "/usr/local/rvm/bin/rvm install rbx-head;sudo chown -R vagrant /usr/local/rvm/src/",
+    unless    => "/usr/local/rvm/bin/rvm list|grep rbx"
+  }
+
+  rvm_system_ruby {
+    'ruby-1.9.3-p194':
+      ensure => 'present',
+      default_use => false;
+    'jruby-1.6.7.2':
+      ensure      => 'present',
+      default_use => false;
+    'rbx-head':
+      ensure      => 'present',
+      default_use => false
+  }
+
+  rvm_gem {
+    'bundler':
+      name => 'bundler',
+      ruby_version => 'ruby-1.9.3-p194',
+      ensure => latest,
+      require => Rvm_system_ruby['ruby-1.9.3-p194'];
+    'puppet':
+      name => 'puppet',
+      ruby_version => 'ruby-1.9.3-p194',
+      ensure => latest,
+      require => Rvm_system_ruby['ruby-1.9.3-p194'];
+    'rake':
+      name => 'rake',
+      ruby_version => 'ruby-1.9.3-p194',
+      ensure => latest,
+      require => Rvm_system_ruby['ruby-1.9.3-p194'];
+
+  }
+}
 
 class { 'memcached': }
