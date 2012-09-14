@@ -1,0 +1,22 @@
+---
+base_port: 8183
+apps:
+  auth:
+    path: ../auth-backend
+    variable: QS_OAUTH_SITE
+  datastore:
+    path: ../datastore-backend
+    variable: QS_DATASTORE_BACKEND_URL
+  graph:
+    path: ../graph-backend
+    variable: QS_GRAPH_BACKEND_URL
+  devcenter:
+    path: ../devcenter-backend
+    variable: QS_DEVCENTER_BACKEND_URL
+  canvas:
+    path: ../canvas-app
+    variable: QS_CANVAS_APP_URL
+  sample-devapp:
+    path: ../sample-devapp
+    variable: QS_SAMPLE_DEVAPP_URL
+

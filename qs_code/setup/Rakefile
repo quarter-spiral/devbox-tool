@@ -83,16 +83,25 @@ task :add_new_repos do
   require "fileutils"
   require "grit"
 
-  user = ask("Github User: ")
-  pass = ask("Github password:  " ) { |q| q.echo = "x"}
-
   organization = 'quarter-spiral'
 
   root = File.dirname(__FILE__)
   project_path = File.expand_path('../projects', root)
 
-  token = gl("Authenticating with GitHub") do
-    token = github_post('/authorizations', basic_auth: {user: user, pass: pass}, body: {scopes: ['repo']})['token']
+  home = File.expand_path(".", "~")
+
+  auth_token_file = File.expand_path('./.github_auth_token', home)
+  token = nil
+  if File.exist?(auth_token_file)
+    token = File.read(auth_token_file).chomp
+  else
+    user = ask("Github User: ")
+    pass = ask("Github password:  " ) { |q| q.echo = "x"}
+
+    gl("Authenticating with GitHub") do
+      token = github_post('/authorizations', basic_auth: {user: user, pass: pass}, body: {scopes: ['repo']})['token']
+    end
+    File.open(auth_token_file, 'w') {|f| f.write token}
   end
 
   repos = gl("Retrieving repositories of #{organization}") do
@@ -112,7 +121,6 @@ task :add_new_repos do
 
   updates = []
 
-  home = File.expand_path(".", "~")
   old_authorized_key_file = ''
   gl("Setting up SSH to bundle later on") do
     `mkdir -p ~/.ssh/`
@@ -157,6 +165,18 @@ task :add_new_repos do
   gl("Cleaning up SSH keys") do
     `rm ~/.ssh/__qs_setup_key*`
     File.open(File.expand_path("./.ssh/authorized_keys", home), 'w') {|f| f.write old_authorized_key_file}
+  end
+
+  gl("Copying metaserver configuration in place") do
+    metaserver_path = File.expand_path('./metaserver-tool', project_path)
+    if File.exist?(metaserver_path)
+      config_path = File.expand_path('./config/metaserver.yml', metaserver_path)
+      unless File.exist?(config_path)
+        template_path = File.expand_path('./metaserver.yml', File.dirname(__FILE__))
+        puts template_path
+        File.open(config_path, 'w') {|f| f.write File.read(template_path)}
+      end
+    end
   end
 
   if updates.size > 0

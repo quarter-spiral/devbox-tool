@@ -118,8 +118,23 @@ if $rvm_installed == "true" {
       ruby_version => 'ruby-1.9.3-p194',
       ensure => latest,
       require => Rvm_system_ruby['ruby-1.9.3-p194'];
-
+    'thin':
+      name => 'thin',
+      ruby_version => 'ruby-1.9.3-p194',
+      ensure => latest,
+      require => Rvm_system_ruby['ruby-1.9.3-p194'];
   }
 }
 
 class { 'memcached': }
+
+class add_qs_autoload_scripts {
+  exec {"add autoload to .bashrc":
+    command => "/bin/echo '\n\n/bin/bash -l /etc/qs_autoload_scripts\n' >> /home/vagrant/.bashrc",
+    unless  => "/usr/bin/test -f /etc/qs_autoload_scripts"
+  }
+  file { "/etc/qs_autoload_scripts":
+    content => "cd /vagrant/qs_code/setup;bundle exec rake"
+  }
+}
+class { 'add_qs_autoload_scripts': }

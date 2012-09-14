@@ -3,7 +3,9 @@ Vagrant::Config.run do |config|
   config.vm.box_url   = 'http://files.vagrantup.com/precise32.box'
   config.vm.host_name = 'qs-dev-box'
 
-  config.vm.forward_port 3000, 3000
+  (8183..8200).each do |port|
+    config.vm.forward_port port, port
+  end
 
   config.vm.provision :puppet,
     :manifests_path => 'puppet/manifests',
