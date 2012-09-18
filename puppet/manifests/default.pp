@@ -134,7 +134,28 @@ class add_qs_autoload_scripts {
     unless  => "/usr/bin/test -f /etc/qs_autoload_scripts"
   }
   file { "/etc/qs_autoload_scripts":
-    content => "cd /vagrant/qs_code/setup;bundle exec rake"
+    content => "cd /vagrant/qs_code/setup;bundle install;bundle exec rake"
   }
 }
 class { 'add_qs_autoload_scripts': }
+
+class add_qs_convenience_scripts {
+  exec {"Add ~/bin to the PATH":
+    command => "/bin/echo 'export PATH=\$PATH:~/bin' >> /home/vagrant/.bashrc",
+    unless  => "/usr/bin/test -f /home/vagrant/bin/metaserver"
+  }
+
+  file { "/home/vagrant/bin":
+    ensure => "directory",
+    owner   => "vagrant",
+    group   => "vagrant"
+  }
+
+  file {"/home/vagrant/bin/metaserver":
+    content => "#!/bin/bash\n/bin/bash -lc 'cd /vagrant/qs_code/projects/metaserver-tool;bundle exec rackup -p 8183'",
+    owner   => "vagrant",
+    group   => "vagrant",
+    mode    => 750
+  }
+}
+class { 'add_qs_convenience_scripts': }

@@ -18,13 +18,12 @@ Building the virtual machine is this easy:
     host $ cd devbox-tool
     host $ vagrant up
     host $ vagrant reload
-    # Wait a looong time
-    host $ cd /vagrant/qs_code/setup
-    # Approve use of rvm
-    host $ bundle install
-    host $ rake
-    # Wait while all our repos are checked out
-
+    # Wait a looong time.
+    host & vagrant ssh
+    # Enter your Github credentials.
+    # Then wait some more while all our repos
+    # are checked out and bundled for you
+    # by the devbox.
 
 That's it.
 
@@ -75,6 +74,8 @@ The metaserver automatically creates a user named ``Jack`` in the auth backend f
 * MongoDB
 
 * Setup script for all QS repos
+
+* Metaserver
 
 ## Recommended Workflow
 
