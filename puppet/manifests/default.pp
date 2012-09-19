@@ -156,6 +156,11 @@ class add_qs_convenience_scripts {
     unless  => "/usr/bin/test -f /home/vagrant/bin/metaserver"
   }
 
+  exec {"Add custom aliases to the bashrc":
+    command => "/bin/echo 'source /home/vagrant/.qs_bash_aliases' >> /home/vagrant/.bashrc",
+    unless  => "/usr/bin/test -f /home/vagrant/.qs_bash_aliases"
+  }
+
   file { "/home/vagrant/bin":
     ensure => "directory",
     owner   => "vagrant",
@@ -164,6 +169,14 @@ class add_qs_convenience_scripts {
 
   file {"/home/vagrant/bin/metaserver":
     content => "#!/bin/bash\n/bin/bash -lc 'cd /vagrant/qs_code/projects/metaserver-tool;bundle exec rackup -p 8183'",
+    owner   => "vagrant",
+    group   => "vagrant",
+    mode    => 750
+  }
+
+
+  file {"/home/vagrant/.qs_bash_aliases":
+    content => "alias cdp='cd /vagrant/qs_code/projects'",
     owner   => "vagrant",
     group   => "vagrant",
     mode    => 750
