@@ -49,6 +49,7 @@ class install_core_packages {
   package { ['build-essential', 'git-core']:
     ensure => installed
   }
+  if ! defined(Package['rake']) { package { 'rake': ensure => installed } }
 }
 class { 'install_core_packages': }
 
@@ -70,6 +71,16 @@ class install_neo4j {
 }
 Package['openjdk-7-jre-headless'] -> Class['neo4j']
 class { 'install_neo4j': }
+
+class install_janus {
+  exec {"install janus":
+    command   => "/bin/su vagrant -l -c 'curl -Lo- http://bit.ly/janus-bootstrap | bash'",
+    logoutput => 'true',
+    unless    => "/usr/bin/test -d /home/vagrant/.vim/janus"
+  }
+  if ! defined(Package['vim']) { package { 'vim': ensure => installed } }
+}
+class { 'install_janus': }
 
 class { mongodb:
   ulimit_nofile => 40000,
