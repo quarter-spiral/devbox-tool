@@ -168,7 +168,7 @@ class add_qs_convenience_scripts {
   }
 
   file {"/home/vagrant/bin/metaserver":
-    content => "#!/bin/bash\n/bin/bash -lc 'cd /vagrant/qs_code/projects/metaserver-tool;bundle exec rackup -p 8183'",
+    content => "#!/bin/bash\n/bin/bash -lc 'cd /vagrant/qs_code/projects/metaserver-tool;bundle exec thin -p 8183 start > tmp/metaserver.log 2> tmp/metaserver.log'",
     owner   => "vagrant",
     group   => "vagrant",
     mode    => 750
@@ -176,7 +176,7 @@ class add_qs_convenience_scripts {
 
 
   file {"/home/vagrant/.qs_bash_aliases":
-    content => "alias cdp='cd /vagrant/qs_code/projects'\nalias b='bundle exec'\nalias fixfiles='sudo mount /vagrant -o remount;cd `pwd`'",
+    content => "alias cdp='cd /vagrant/qs_code/projects'\nalias b='bundle exec'\nalias fixfiles='sudo mount /vagrant -o remount;cd `pwd`'\nalias b='bundle exec'",
     owner   => "vagrant",
     group   => "vagrant",
     mode    => 750
