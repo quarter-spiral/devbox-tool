@@ -171,11 +171,10 @@ task :add_new_repos do
     metaserver_path = File.expand_path('./metaserver-tool', project_path)
     if File.exist?(metaserver_path)
       config_path = File.expand_path('./config/metaserver.yml', metaserver_path)
-      unless File.exist?(config_path)
-        template_path = File.expand_path('./metaserver.yml', File.dirname(__FILE__))
-        puts template_path
-        File.open(config_path, 'w') {|f| f.write File.read(template_path)}
-      end
+      File.exist?(config_path)
+      template_path = File.expand_path('./metaserver.yml', File.dirname(__FILE__))
+      puts template_path
+      File.open(config_path, 'w') {|f| f.write File.read(template_path)}
     end
   end
 

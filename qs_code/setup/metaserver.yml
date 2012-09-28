@@ -3,7 +3,7 @@ base_port: 8183
 apps:
   auth:
     path: ../auth-backend
-    variable: QS_OAUTH_SITE
+    variable: QS_AUTH_BACKEND_URL
   datastore:
     path: ../datastore-backend
     variable: QS_DATASTORE_BACKEND_URL
