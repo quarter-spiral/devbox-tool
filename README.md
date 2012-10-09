@@ -119,3 +119,30 @@ Finally, to completely wipe the virtual machine from the disk **destroying all i
     host $ vagrant destroy # DANGER: all is gone
 
 Please check the [Vagrant documentation](http://vagrantup.com/v1/docs/index.html) for more information on Vagrant.
+
+## QS Shortcuts
+
+There are some small tools included that make your life on the box a
+bit easier.
+
+### cdp
+
+Run ``cdp`` to change to the projects directory.
+
+### b
+
+Run ``b`` to bundle install in a project.
+
+### fixfiles
+
+Sometimes file permissions are messed up when you edit files from your host system in this case just run ``fixfiles``.
+
+### fixmongo
+
+If Mongo dies you can restart it with ``fixmongo``.
+
+### Hacking
+
+If you want to add your own shortcuts just edit the
+``/puppet/qs_code/setup/aliases`` file in the ``devbox-tool`` project
+and run ``vagrant reload`` afterwards.

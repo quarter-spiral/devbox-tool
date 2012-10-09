@@ -176,7 +176,7 @@ class add_qs_convenience_scripts {
 
 
   file {"/home/vagrant/.qs_bash_aliases":
-    content => "alias cdp='cd /vagrant/qs_code/projects'\nalias b='bundle exec'\nalias fixfiles='sudo mount /vagrant -o remount;cd `pwd`'\nalias b='bundle exec'",
+    source  => "/vagrant/qs_code/setup/aliases",
     owner   => "vagrant",
     group   => "vagrant",
     mode    => 750

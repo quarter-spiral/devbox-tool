@@ -1,0 +1,5 @@
+alias cdp='cd /vagrant/qs_code/projects'
+alias b='bundle exec'
+alias fixfiles='sudo mount /vagrant -o remount;cd `pwd`'
+alias b='bundle exec'
+alias fixmongo="sudo rm /var/lib/mongodb/mongod.lock && sudo service mongodb restart"
