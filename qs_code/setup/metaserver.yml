@@ -19,4 +19,7 @@ apps:
   sample-devapp:
     path: ../sample-devapp
     variable: QS_SAMPLE_DEVAPP_URL
+  spiral-galaxy:
+    path: ../spiral-galaxy
+    variable: QS_SPIRAL_GALAXY_URL
 
