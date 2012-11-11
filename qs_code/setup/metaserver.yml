@@ -22,4 +22,7 @@ apps:
   spiral-galaxy:
     path: ../spiral-galaxy
     variable: QS_SPIRAL_GALAXY_URL
+  playercenter-backend:
+    path: ../playercenter-backend
+    variable: QS_PLAYERCENTER_BACKEND_URL
 
