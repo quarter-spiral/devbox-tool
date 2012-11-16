@@ -72,6 +72,14 @@ class install_neo4j {
 Package['openjdk-7-jre-headless'] -> Class['neo4j']
 class { 'install_neo4j': }
 
+class { 'redis':
+    redis_ver => '2.6.4'
+}
+
+redis::service { 'redis_6379':
+    port   => '6379'
+}
+
 class install_janus {
   exec {"install janus":
     command   => "/bin/su vagrant -l -c 'curl -Lo- http://bit.ly/janus-bootstrap | bash'",
