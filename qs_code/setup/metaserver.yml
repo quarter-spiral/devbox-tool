@@ -25,4 +25,6 @@ apps:
   playercenter-backend:
     path: ../playercenter-backend
     variable: QS_PLAYERCENTER_BACKEND_URL
-
+  sdk-app:
+    path: ../sdk-app
+    variable: QS_SDK_APP_URL
