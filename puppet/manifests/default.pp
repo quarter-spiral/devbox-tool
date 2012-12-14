@@ -23,6 +23,16 @@ class install_sqlite3 {
 }
 class { 'install_sqlite3': }
 
+class install_libv8 {
+  package { 'libv8-dev':
+    ensure => installed;
+  }
+  package { 'libv8-3.7.12.22':
+    ensure => installed;
+  }
+}
+class { 'install_libv8': }
+
 class install_postgres {
   class { 'postgresql': }
 
