@@ -28,3 +28,6 @@ apps:
   sdk-app:
     path: ../sdk-app
     variable: QS_SDK_APP_URL
+  docs-app:
+    path: ../docs-app
+    variable: QS_DOCS_APP_URL
