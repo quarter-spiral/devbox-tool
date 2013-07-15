@@ -3,3 +3,4 @@ alias b='bundle exec'
 alias fixfiles='sudo mount /vagrant -o remount;cd `pwd`'
 alias b='bundle exec'
 alias fixmongo="sudo rm /var/lib/mongodb/mongod.lock && sudo service mongodb restart"
+alias diemeta="kill -9 `ps -ef | grep thin | grep -v grep | awk '{print $2}'`"

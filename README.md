@@ -141,6 +141,10 @@ Sometimes file permissions are messed up when you edit files from your host syst
 
 If Mongo dies you can restart it with ``fixmongo``.
 
+### diemeta
+
+If your meta server is in a b0rked state try to quit it an run ``diemeta`` afterwards to kill all the app servers.
+
 ### Hacking
 
 If you want to add your own shortcuts just edit the
